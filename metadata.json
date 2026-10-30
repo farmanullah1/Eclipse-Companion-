@@ -1,0 +1,6 @@
+{
+  "name": "Eclipse Companion",
+  "description": "Offline-first companion app for Ronin Eclipse earbuds featuring reliable device control, 10-band independent EQ, touch controls, sound tools, and Hearing Assist.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,32 @@
+package com.example.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Light Scheme Colors (Section 5.2)
+val LightBackground = Color(0xFFF6F6F4)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceSecondary = Color(0xFFEEEEEC)
+val LightTextPrimary = Color(0xFF181818)
+val LightTextSecondary = Color(0xFF666663)
+val LightOutline = Color(0xFFD7D7D2)
+val LightAccent = Color(0xFF344C63)
+val LightAccentContainer = Color(0xFFE3EAF0)
+val LightSuccess = Color(0xFF2D6A4F)
+val LightWarning = Color(0xFF9A6700)
+val LightError = Color(0xFFB3261E)
+
+// Dark Scheme Colors (Section 5.2 + Official App Palette)
+val DarkBackground = Color(0xFF121314)
+val DarkSurface = Color(0xFF1B1C1E)
+val DarkSurfaceSecondary = Color(0xFF25272A)
+val DarkSurfaceCard = Color(0xFF1E2024)
+val DarkTextPrimary = Color(0xFFF3F3F0)
+val DarkTextSecondary = Color(0xFFB7B8B5)
+val DarkOutline = Color(0xFF383A3E)
+val DarkAccent = Color(0xFF5D5FEF)
+val DarkAccentLight = Color(0xFF818CF8)
+val DarkAccentContainer = Color(0xFF283743)
+val DarkSuccess = Color(0xFF82C9A5)
+val DarkWarning = Color(0xFFF1C46A)
+val DarkError = Color(0xFFF2A09A)
+val GoldAccent = Color(0xFFE5C07B)

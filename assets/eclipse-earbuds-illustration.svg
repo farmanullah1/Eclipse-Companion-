@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <radialGradient id="caseGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2D3038"/>
+      <stop offset="100%" stop-color="#141517"/>
+    </radialGradient>
+    <linearGradient id="goldTrim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E5AB"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#AA771C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="400" height="300" rx="30" fill="url(#caseGlow)"/>
+
+  <!-- Charging Case Silhouette -->
+  <ellipse cx="200" cy="200" rx="130" ry="70" fill="#1C1E22" stroke="url(#goldTrim)" stroke-width="3"/>
+  <ellipse cx="200" cy="180" rx="110" ry="40" fill="#121314"/>
+
+  <!-- Left Earbud -->
+  <g transform="translate(140, 110)">
+    <circle cx="20" cy="20" r="22" fill="#F4F4F2"/>
+    <circle cx="20" cy="20" r="14" fill="#E8E8E4" stroke="url(#goldTrim)" stroke-width="2"/>
+    <rect x="14" y="36" width="12" height="42" rx="6" fill="#F4F4F2"/>
+    <rect x="18" y="44" width="4" height="24" rx="2" fill="url(#goldTrim)"/>
+  </g>
+
+  <!-- Right Earbud -->
+  <g transform="translate(220, 110)">
+    <circle cx="20" cy="20" r="22" fill="#F4F4F2"/>
+    <circle cx="20" cy="20" r="14" fill="#E8E8E4" stroke="url(#goldTrim)" stroke-width="2"/>
+    <rect x="14" y="36" width="12" height="42" rx="6" fill="#F4F4F2"/>
+    <rect x="18" y="44" width="4" height="24" rx="2" fill="url(#goldTrim)"/>
+  </g>
+
+  <!-- Status Indicator Dot -->
+  <circle cx="200" cy="225" r="4" fill="#818CF8"/>
+</svg>
