@@ -128,6 +128,27 @@ fun HelpScreen(
             body = "This companion application runs completely offline without accounts, servers, analytics, or remote tracking. Zero microphone audio is ever saved, recorded, or transmitted."
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        HelpCard(
+            title = "What do Clean Dust and Drain Moisture do?",
+            body = "They play a fixed tone from your phone through the earbuds for 30 to 60 seconds. The vibration may help move water or dust out of the speaker opening. Take the earbuds out of your ears first. It is not guaranteed and does not replace gentle cleaning."
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        HelpCard(
+            title = "Why does the mode say Off instead of Normal?",
+            body = "The official app calls the no-processing mode Off. It is the same state: no noise cancelling and no transparency."
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        HelpCard(
+            title = "Why is there no case battery on Home?",
+            body = "The official app shows only left and right battery. The case value appears only if a verified profile reports it."
+        )
+
         Spacer(modifier = Modifier.height(30.dp))
     }
 }

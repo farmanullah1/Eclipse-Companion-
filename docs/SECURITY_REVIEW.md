@@ -21,3 +21,5 @@
 - **Command Allowlist**: Only validated, bounds-checked commands for standard BLE services and verified mode frames are permitted.
 - **Firmware Protection**: OTA firmware flashing is locked in offline mode to prevent corrupting earbud flash memory without verified vendor cryptographic signatures.
 - **Redacted Diagnostics**: Device MAC addresses and hardware identifiers are masked when copying diagnostic summaries.
+- **Maintenance tones (Clean Dust, Drain Moisture)**: only play through a Bluetooth earbud route, never the phone speaker; fixed duration (30 s / 60 s), amplitude caps 0.5 and 0.25, 3 s fade-in, user must confirm earbuds are out of the ears, stop on call, focus loss, route loss, screen exit and app stop. No microphone is used.
+

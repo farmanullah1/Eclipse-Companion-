@@ -130,7 +130,7 @@ fun TouchSettingsScreen(
             }
 
             Text(
-                text = "Touch Controls",
+                text = "Touch Settings",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -151,10 +151,17 @@ fun TouchSettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Select an earbud side to customize its tap and hold responses.",
+            text = "Earbud",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = "Choose a side, then map each gesture",
             fontSize = 12.sp,
             color = Color(0xFF8E9199)
         )
@@ -183,7 +190,7 @@ fun TouchSettingsScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Gestures Configuration Card
+        // Gestures Configuration Card (Matching Screenshot 3)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -199,8 +206,8 @@ fun TouchSettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${selectedSide.displayName} Earbud Gestures",
-                        fontSize = 15.sp,
+                        text = "Gestures",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )

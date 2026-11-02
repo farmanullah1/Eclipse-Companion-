@@ -116,7 +116,7 @@ fun SoundSettingsScreen(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "10-Band Equalizer",
+                    text = "Audio Presets",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -144,7 +144,16 @@ fun SoundSettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Equalizer",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Real-Time Frequency Response Curve Visualizer
         Box(
@@ -180,7 +189,7 @@ fun SoundSettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "INDEPENDENT FREQUENCY GAIN (31Hz – 16kHz)",
+                        text = "INDEPENDENT FREQUENCY GAIN (32Hz – 16kHz)",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF8E9199),
@@ -258,7 +267,7 @@ fun SoundSettingsScreen(
 
         // Presets Heading
         Text(
-            text = "Audio Presets",
+            text = "Presets",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -268,8 +277,8 @@ fun SoundSettingsScreen(
 
         // Mood Category
         Text(
-            text = "Mood Profiles",
-            fontSize = 12.sp,
+            text = "Mood",
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF9EA0A6)
         )
@@ -285,8 +294,8 @@ fun SoundSettingsScreen(
 
         // Artists Category
         Text(
-            text = "Artist Tunings",
-            fontSize = 12.sp,
+            text = "Artists",
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF9EA0A6)
         )
@@ -302,8 +311,8 @@ fun SoundSettingsScreen(
 
         // Custom Category
         Text(
-            text = "My Custom Profiles",
-            fontSize = 12.sp,
+            text = "Custom",
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF9EA0A6)
         )
@@ -662,7 +671,7 @@ private fun PresetTile(
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.height(14.dp)
                 ) {
-                    profile.bands.take(9).forEach { band ->
+                    profile.bands.forEach { band ->
                         val barHeight = ((band.gainDb + 12f) / 24f * 12f + 2f).coerceIn(2f, 14f)
                         Box(
                             modifier = Modifier

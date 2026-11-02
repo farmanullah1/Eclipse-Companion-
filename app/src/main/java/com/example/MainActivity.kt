@@ -14,10 +14,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -50,15 +53,26 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SupportAgent
 import com.example.ui.screens.DevicesScanScreen
 import com.example.ui.screens.DiagnosticsScreen
+import com.example.ui.screens.EqualizerScreen
 import com.example.ui.screens.HearingAssistScreen
 import com.example.ui.screens.HelpScreen
 import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.ProductsScreen
 import com.example.ui.screens.RelaxationScreen
 import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.SoundSettingsScreen
 import com.example.ui.screens.SoundToolsScreen
+import com.example.ui.screens.TipsScreen
 import com.example.ui.screens.TouchSettingsScreen
 import com.example.ui.theme.DarkAccent
 import com.example.ui.theme.DarkAccentLight
@@ -120,6 +134,9 @@ class MainActivity : ComponentActivity() {
                             AppScreen.DIAGNOSTICS -> DiagnosticsScreen(viewModel = viewModel)
                             AppScreen.HELP -> HelpScreen(viewModel = viewModel)
                             AppScreen.SETTINGS -> SettingsScreen(viewModel = viewModel)
+                            AppScreen.PRODUCTS -> ProductsScreen(viewModel = viewModel)
+                            AppScreen.TIPS -> TipsScreen(viewModel = viewModel)
+                            AppScreen.EQUALIZER -> EqualizerScreen(viewModel = viewModel)
                         }
 
                         // Notification Toast / Banner
@@ -164,6 +181,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.soundToolsEngine.stop()
+    }
 }
 
 @Composable
@@ -171,86 +193,122 @@ fun AppBottomNavigationBar(
     currentScreen: AppScreen,
     onSelectScreen: (AppScreen) -> Unit
 ) {
-    NavigationBar(
+    Row(
         modifier = Modifier
+            .fillMaxWidth()
             .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .testTag("app_bottom_nav_bar"),
-        containerColor = Color(0xFF16171A),
-        tonalElevation = 0.dp
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        BottomNavItem(
-            screen = AppScreen.HOME,
-            icon = Icons.Default.Headphones,
-            label = "Devices",
-            isSelected = currentScreen == AppScreen.HOME || currentScreen == AppScreen.SCAN,
-            onSelect = onSelectScreen
-        )
+        // Floating Pill Bar (Matching Screenshot 1)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(36.dp))
+                .background(Color(0xFF22242B))
+                .border(1.dp, Color(0xFF343744), RoundedCornerShape(36.dp))
+                .padding(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PillNavItem(
+                    icon = Icons.Default.Home,
+                    label = "Home",
+                    isSelected = currentScreen == AppScreen.HOME || currentScreen == AppScreen.SCAN,
+                    onClick = { onSelectScreen(AppScreen.HOME) },
+                    modifier = Modifier.weight(1f)
+                )
 
-        BottomNavItem(
-            screen = AppScreen.SOUND_SETTINGS,
-            icon = Icons.Default.GraphicEq,
-            label = "Sound",
-            isSelected = currentScreen == AppScreen.SOUND_SETTINGS,
-            onSelect = onSelectScreen
-        )
+                PillNavItem(
+                    icon = Icons.Default.Lightbulb,
+                    label = "News",
+                    isSelected = currentScreen == AppScreen.TIPS,
+                    onClick = { onSelectScreen(AppScreen.TIPS) },
+                    modifier = Modifier.weight(1f)
+                )
 
-        BottomNavItem(
-            screen = AppScreen.TOUCH_SETTINGS,
-            icon = Icons.Default.TouchApp,
-            label = "Controls",
-            isSelected = currentScreen == AppScreen.TOUCH_SETTINGS,
-            onSelect = onSelectScreen
-        )
+                PillNavItem(
+                    icon = Icons.Default.Info,
+                    label = "Products",
+                    isSelected = currentScreen == AppScreen.PRODUCTS,
+                    onClick = { onSelectScreen(AppScreen.PRODUCTS) },
+                    modifier = Modifier.weight(1f)
+                )
 
-        BottomNavItem(
-            screen = AppScreen.HEARING_ASSIST,
-            icon = Icons.Default.Hearing,
-            label = "Assist",
-            isSelected = currentScreen == AppScreen.HEARING_ASSIST,
-            onSelect = onSelectScreen
-        )
+                PillNavItem(
+                    icon = Icons.Default.Person,
+                    label = "Profile",
+                    isSelected = currentScreen == AppScreen.SETTINGS,
+                    onClick = { onSelectScreen(AppScreen.SETTINGS) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
 
-        BottomNavItem(
-            screen = AppScreen.SETTINGS,
-            icon = Icons.Default.Settings,
-            label = "Settings",
-            isSelected = currentScreen == AppScreen.SETTINGS || currentScreen == AppScreen.HELP,
-            onSelect = onSelectScreen
-        )
+        // Circular Support Button (Matching Screenshot 1)
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF22242B))
+                .border(1.dp, Color(0xFF343744), CircleShape)
+                .clickable { onSelectScreen(AppScreen.HELP) }
+                .testTag("support_button"),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.SupportAgent,
+                contentDescription = "Help and support",
+                tint = Color(0xFFB4B6FF),
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.BottomNavItem(
-    screen: AppScreen,
+private fun PillNavItem(
     icon: ImageVector,
     label: String,
     isSelected: Boolean,
-    onSelect: (AppScreen) -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    NavigationBarItem(
-        selected = isSelected,
-        onClick = { onSelect(screen) },
-        icon = {
+    val bgColor = if (isSelected) Color(0xFF4A4D86) else Color.Transparent
+    val contentColor = if (isSelected) Color.White else Color(0xFFA8A8B8)
+
+    Box(
+        modifier = modifier
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(bgColor)
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                modifier = Modifier.size(20.dp)
+                tint = contentColor,
+                modifier = Modifier.size(19.dp)
             )
-        },
-        label = {
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
                 fontSize = 10.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = contentColor,
+                maxLines = 1
             )
-        },
-        colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = DarkAccentLight,
-            selectedTextColor = DarkAccentLight,
-            unselectedIconColor = Color(0xFF7A7D85),
-            unselectedTextColor = Color(0xFF7A7D85),
-            indicatorColor = Color(0xFF282D42)
-        )
-    )
+        }
+    }
 }

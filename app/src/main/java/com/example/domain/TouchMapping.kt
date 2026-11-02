@@ -14,7 +14,7 @@ enum class TouchGesture(val displayName: String, val stepNumber: Int) {
 
 enum class TouchAction(val displayName: String, val description: String) {
     NO_ACTION("No Action", "Disables touch response for this gesture"),
-    ANC_SWITCHING("ANC Toggle", "Cycles between Noise Reduction, Transparency, and Off"),
+    ANC_SWITCHING("ANC Switching", "Cycles between Noise Reduction, Transparency, and Off"),
     PLAY_PAUSE("Play / Pause", "Toggles playback of music or media"),
     NEXT_TRACK("Next Track", "Skips forward to the next audio track"),
     PREVIOUS_TRACK("Previous Track", "Jumps back to previous track"),

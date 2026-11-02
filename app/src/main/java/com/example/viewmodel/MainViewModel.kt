@@ -39,7 +39,10 @@ enum class AppScreen {
     SOUND_TOOLS,
     DIAGNOSTICS,
     HELP,
-    SETTINGS
+    SETTINGS,
+    PRODUCTS,
+    TIPS,
+    EQUALIZER
 }
 
 data class UserNotification(
@@ -75,6 +78,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // Preselected Sound Tool tab (Clean Dust vs Drain Moisture)
     val selectedSoundTool = MutableStateFlow(com.example.audio.ToolMode.CLEAN_DUST)
+
+    // A/B Comparison state (Curve vs Flat 0 dB)
+    private val _isAbBypassActive = MutableStateFlow(false)
+    val isAbBypassActive: StateFlow<Boolean> = _isAbBypassActive.asStateFlow()
+    private var preBypassProfile: EqProfile? = null
+
+    // Audio Enhancements (Bass Boost & Spatial Virtualizer)
+    private val _bassBoostEnabled = MutableStateFlow(false)
+    val bassBoostEnabled: StateFlow<Boolean> = _bassBoostEnabled.asStateFlow()
+    private val _bassBoostLevel = MutableStateFlow(50) // 0..100%
+    val bassBoostLevel: StateFlow<Int> = _bassBoostLevel.asStateFlow()
+
+    private val _virtualizerEnabled = MutableStateFlow(false)
+    val virtualizerEnabled: StateFlow<Boolean> = _virtualizerEnabled.asStateFlow()
+    private val _virtualizerLevel = MutableStateFlow(50) // 0..100%
+    val virtualizerLevel: StateFlow<Int> = _virtualizerLevel.asStateFlow()
 
     val savedEqProfiles = settingsRepository.savedEqProfiles.stateIn(
         viewModelScope,
@@ -267,6 +286,87 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 bluetoothRepository.applyEqProfile(fallback)
             }
             showNotification("Custom preset deleted")
+        }
+    }
+
+    // A/B Comparison Bypass Toggle
+    fun toggleAbBypass() {
+        if (_isAbBypassActive.value) {
+            // Restore saved curve
+            preBypassProfile?.let { saved ->
+                _activeEqProfile.value = saved
+                viewModelScope.launch {
+                    bluetoothRepository.applyEqProfile(saved)
+                }
+            }
+            _isAbBypassActive.value = false
+            showNotification("A/B: Restored custom EQ curve")
+        } else {
+            // Save current profile and apply flat 0 dB
+            val current = _activeEqProfile.value
+            preBypassProfile = current
+            val flat = current.copy(bands = EqProfile.FREQUENCIES.map { com.example.domain.EqBand(it, 0.0f) })
+            _activeEqProfile.value = flat
+            _isAbBypassActive.value = true
+            viewModelScope.launch {
+                bluetoothRepository.applyEqProfile(flat)
+            }
+            showNotification("A/B: Comparing against Flat (0 dB)")
+        }
+    }
+
+    // Bass Boost & Spatial Virtualizer Controls
+    fun setBassBoost(enabled: Boolean, level: Int = _bassBoostLevel.value) {
+        _bassBoostEnabled.value = enabled
+        _bassBoostLevel.value = level.coerceIn(0, 100)
+        showNotification(if (enabled) "Bass Boost active ($level%)" else "Bass Boost disabled")
+    }
+
+    fun setVirtualizer(enabled: Boolean, level: Int = _virtualizerLevel.value) {
+        _virtualizerEnabled.value = enabled
+        _virtualizerLevel.value = level.coerceIn(0, 100)
+        showNotification(if (enabled) "Spatial Virtualizer active ($level%)" else "Virtualizer disabled")
+    }
+
+    // Hearing Calibration Engine Integration
+    fun playHearingTone(freqHz: Double, amp: Float) {
+        soundToolsEngine.playHearingTestTone(freqHz = freqHz, amplitude = amp, durationMs = 500)
+    }
+
+    fun stopHearingTone() {
+        soundToolsEngine.stop()
+    }
+
+    fun applyHearingTestCompensation(testResults: Map<Int, Float>) {
+        // Calculate compensatory gain for each of the 10 bands
+        // If detection threshold fraction is higher (ear needs higher sound to hear), provide positive gain boost
+        val baseFrequencies = EqProfile.FREQUENCIES
+        val compensatedBands = baseFrequencies.map { hz ->
+            // Find closest tested frequency
+            val closestTestedHz = testResults.keys.minByOrNull { Math.abs(it - hz) } ?: 1000
+            val thresholdFraction = testResults[closestTestedHz] ?: 0.5f // 0.05..0.6
+
+            // Normal threshold is around 0.15f. If user only hears at 0.4f, boost by up to +6 dB
+            val delta = (thresholdFraction - 0.15f) / 0.35f
+            val gain = (delta * 6.0f).coerceIn(-3.0f, 7.5f)
+            val roundedGain = Math.round(gain * 2) / 2.0f
+            com.example.domain.EqBand(hz, roundedGain)
+        }
+
+        val customProfile = EqProfile(
+            id = "hearing_calibrated_${System.currentTimeMillis()}",
+            name = "Personal Hearing Curve",
+            category = com.example.domain.EqPresetCategory.CUSTOM,
+            bands = compensatedBands,
+            isUserEditable = true
+        )
+
+        viewModelScope.launch {
+            settingsRepository.saveEqProfile(customProfile)
+            settingsRepository.setActiveEqProfileId(customProfile.id)
+            _activeEqProfile.value = customProfile
+            bluetoothRepository.applyEqProfile(customProfile)
+            showNotification("Calibrated EQ applied & saved to presets!")
         }
     }
 

@@ -18,11 +18,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.PI
 import kotlin.math.sin
 
-enum class ToolMode {
-    IDLE,
-    CLEAN_DUST,
-    DRAIN_MOISTURE,
-    RELAXATION
+enum class ToolMode(val durationSeconds: Int = 0, val amplitude: Float = 0f) {
+    IDLE(0, 0f),
+    CLEAN_DUST(60, 0.25f),
+    DRAIN_MOISTURE(30, 0.5f),
+    RELAXATION(600, 0.35f)
 }
 
 enum class RelaxationSound(val displayName: String) {
@@ -58,7 +58,7 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
         }
     }
 
-    fun startCleanDust(durationSeconds: Int = 15) {
+    fun startCleanDust(durationSeconds: Int = ToolMode.CLEAN_DUST.durationSeconds) {
         stop()
         _currentMode.value = ToolMode.CLEAN_DUST
         _totalDurationSeconds.value = durationSeconds
@@ -85,7 +85,7 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
                 val freq = 350.0 + progress * 300.0
 
                 for (i in buffer.indices) {
-                    val sample = sin(phase) * 0.85
+                    val sample = sin(phase) * ToolMode.CLEAN_DUST.amplitude
                     buffer[i] = (sample * 32767.0).toInt().toShort()
                     phase += 2.0 * PI * freq / sampleRate
                     if (phase > 2.0 * PI) phase -= 2.0 * PI
@@ -96,7 +96,7 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
         }
     }
 
-    fun startDrainMoisture(durationSeconds: Int = 15) {
+    fun startDrainMoisture(durationSeconds: Int = ToolMode.DRAIN_MOISTURE.durationSeconds) {
         stop()
         _currentMode.value = ToolMode.DRAIN_MOISTURE
         _totalDurationSeconds.value = durationSeconds
@@ -120,7 +120,7 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
 
                 // Low-frequency hydraulic displacement pulse: 145Hz pulses with rhythmic amplitude modulation
                 val cycleSec = (System.currentTimeMillis() % 1000) / 1000.0
-                val amp = if (cycleSec < 0.6) 0.9 else 0.05
+                val amp = if (cycleSec < 0.6) ToolMode.DRAIN_MOISTURE.amplitude.toDouble() else 0.05
                 val freq = 145.0
 
                 for (i in buffer.indices) {
@@ -201,6 +201,44 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
                     }
                 }
                 track.write(buffer, 0, buffer.size)
+            }
+            stop()
+        }
+    }
+
+    fun playHearingTestTone(freqHz: Double, amplitude: Float = 0.15f, durationMs: Long = 600) {
+        stop()
+        isPlaying.set(true)
+        playbackJob = coroutineScope.launch(Dispatchers.Default) {
+            val track = createTrack()
+            audioTrack = track
+            track.play()
+
+            val sampleRate = 44100
+            val totalSamples = (sampleRate * (durationMs / 1000.0)).toInt()
+            val buffer = ShortArray(1024)
+            var phase = 0.0
+            var sampleCount = 0
+
+            val rampSamples = (sampleRate * 0.02).toInt() // 20ms attack/decay to prevent clicks
+            val safeAmp = amplitude.coerceIn(0.01f, 0.4f)
+
+            while (isActive && isPlaying.get() && sampleCount < totalSamples) {
+                val chunkSize = minOf(buffer.size, totalSamples - sampleCount)
+                for (i in 0 until chunkSize) {
+                    val currentSample = sampleCount + i
+                    val env = when {
+                        currentSample < rampSamples -> currentSample.toFloat() / rampSamples
+                        currentSample > totalSamples - rampSamples -> (totalSamples - currentSample).toFloat() / rampSamples
+                        else -> 1.0f
+                    }
+                    val sample = sin(phase) * safeAmp * env
+                    buffer[i] = (sample * 32767.0).toInt().toShort()
+                    phase += 2.0 * PI * freqHz / sampleRate
+                    if (phase > 2.0 * PI) phase -= 2.0 * PI
+                }
+                track.write(buffer, 0, chunkSize)
+                sampleCount += chunkSize
             }
             stop()
         }

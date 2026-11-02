@@ -35,7 +35,7 @@ data class EqProfile(
         const val MIN_GAIN_DB = -12.0f
         const val MAX_GAIN_DB = 12.0f
 
-        val FREQUENCIES = listOf(31, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000)
+        val FREQUENCIES = listOf(32, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000)
 
         fun createFlat(id: String, name: String, category: EqPresetCategory, isEditable: Boolean = true): EqProfile {
             return EqProfile(

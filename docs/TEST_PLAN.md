@@ -12,15 +12,24 @@
 - **`AudioProcessorTest.kt`**:
   - Test 1: Full-scale maximum amplitude inputs (`32767`) are softly compressed by the hyperbolic limiter so output never clips digitally.
   - Test 2: Injected out-of-bounds gain multipliers are clamped to safe internal limits.
-- **`ExampleRobolectricTest.kt`**:
-  - Context resources test verifies `app_name` string matches "Eclipse Companion".
+- **`V4ScreenshotAlignmentTest.kt`**:
+  - Test 1: `eqFrequenciesMatchV4Specification` verifies exact 10 bands `[32, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]`.
+  - Test 2: `eqPresetsIncludeMoodAndArtistsGroups` verifies Mood (6), Artists (7), and Custom groups.
+  - Test 3: `touchGestureLabelsMatchV4OfficialNames` verifies One Tap, Two Tap, Three Tap, Tap & Hold.
+  - Test 4: `touchActionsIncludeAncSwitchingAndNoAction` verifies standard and ignored duplicate actions.
+  - Test 5: `listeningModesIncludeOffState` verifies Noise Reduction, Off, Transparency order and labels.
+  - Test 6: `maintenanceTonesStayShortAndCapped` verifies duration and amplitude capping (60s @ 0.25f, 30s @ 0.50f).
+- **`EqualizerSuiteEnhancementsTest.kt`**:
+  - Test 1: `ten_bands_conform_strictly_to_iso_standards` confirms 10 ISO center frequencies.
+  - Test 2: `json_preset_export_and_import_round_trip` validates schema serialization, custom curves preservation, and parse round-trip.
+  - Test 3: `hearing_test_compensation_calculation_boosts_hearing_loss_frequencies` validates threshold delta compensation math and safe clamp limits.
 
-## 2. Interactive QA & Screen Checklist
-- **Devices Screen**: Connect/Disconnect lifecycle, BLE discovery scan indicator, compatibility badge.
-- **Home Dashboard**: Battery cards, Noise Reduction / Off / Transparency pill, feature tiles.
-- **Audio Presets (Sound Settings)**: 10 vertical sliders with gain indicator, Mood presets, Pakistani Artist presets, Custom presets.
-- **Touch Settings**: Left/Right earbud tab switching, One Tap, Two Tap, Three Tap, Tap & Hold dropdowns, Apply & Reset.
-- **Hearing Assist**: Output route detection, microphone permission prompt, emergency stop button, sensitivity/gain sliders, feedback warning.
-- **Acoustic Tools & Relaxation**: Clean Dust 15s pulse, Drain Moisture 15s pulse, soothing ambient sound synthesizer with timer.
-- **Diagnostics**: Real-time GATT service logs, telemetry metrics, clipboard export with redacted MAC address.
-- **Offline Integrity**: App operates seamlessly in Airplane mode.
+## 2. Interactive QA & Physical Checks
+- Clean Dust and Drain Moisture start only with the tick and an earbuds route, stop on Stop / call / leaving screen / home button, and never play through the phone speaker.
+- Vertical EQ drag changes only its own band (also verified with TalkBack custom accessibility actions).
+- Custom EQ slot save and reload after app restart.
+- Pill navigation bar displays properly and remains accessible at font scale 2.0.
+- Status-bar icons remain readable in both dark and light themes.
+- Listening mode order strictly follows `Noise Reduction · Off · Transparency`.
+- Offline integrity: App operates seamlessly in Airplane mode with zero network access.
+

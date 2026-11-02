@@ -291,7 +291,7 @@ fun SoundToolsScreen(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = if (isRunning) "STOP PULSE" else if (activeTab == ToolMode.CLEAN_DUST) "START CLEAN DUST (15s)" else "START DRAIN MOISTURE (15s)",
+                text = if (isRunning) "STOP PULSE" else if (activeTab == ToolMode.CLEAN_DUST) "START CLEAN DUST (60s)" else "START DRAIN MOISTURE (30s)",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Ronin Eclipse R-7065 (empty template)",
+  "verified": false,
+  "notes": "No commands are known or verified. Capture them from your own earbuds and import a completed profile.",
+  "identify": {
+    "namePrefixes": ["Eclipse", "Ronin"],
+    "serviceUuids": []
+  },
+  "transport": {
+    "type": "gatt",
+    "service": "",
+    "write": "",
+    "notify": "",
+    "writeNoResponse": false,
+    "sppUuid": "00001101-0000-1000-8000-00805F9B34FB"
+  },
+  "framing": { "header": "", "lengthByte": false, "checksum": "none", "checksumFrom": 0 },
+  "modes": {},
+  "commands": {
+    "readBattery": { "request": "", "ack": null, "verified": false },
+    "readMode": { "request": "", "ack": null, "verified": false },
+    "setMode": { "request": "", "ack": null, "verified": false },
+    "readFirmware": { "request": "", "ack": null, "verified": false },
+    "setEq": { "request": "", "ack": null, "verified": false },
+    "setTouch": { "request": "", "ack": null, "verified": false },
+    "setGaming": { "request": "", "ack": null, "verified": false },
+    "setName": { "request": "", "ack": null, "verified": false },
+    "setTransparencyLevel": { "request": "", "ack": null, "verified": false },
+    "setAncLevel": { "request": "", "ack": null, "verified": false },
+    "setWearDetection": { "request": "", "ack": null, "verified": false },
+    "setVoicePrompts": { "request": "", "ack": null, "verified": false },
+    "factoryReset": { "request": "", "ack": null, "verified": false }
+  }
+}

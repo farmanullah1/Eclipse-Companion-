@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Edit
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -94,215 +96,378 @@ fun HomeScreen(
             .padding(horizontal = 18.dp, vertical = 8.dp)
             .testTag("home_screen")
     ) {
-        // Top Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = { viewModel.navigateTo(AppScreen.SCAN) },
+        if (!isConnected) {
+            // Top Bar for Devices Screen (Matching Screenshot 1)
+            Row(
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color(0xFF222428))
-                    .size(42.dp)
-                    .testTag("devices_button")
+                    .fillMaxWidth()
+                    .padding(top = 4.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Air,
-                    contentDescription = "Devices",
-                    tint = Color(0xFFF3F3F0),
-                    modifier = Modifier.size(20.dp)
+                Spacer(modifier = Modifier.size(42.dp))
+
+                Text(
+                    text = "Devices",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
+
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFF222428))
+                            .size(42.dp)
+                            .testTag("more_menu_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = Color(0xFFF3F3F0),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color(0xFF1E2024))
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Add / Scan Device", color = Color.White) },
+                            onClick = {
+                                showMenu = false
+                                viewModel.navigateTo(AppScreen.SCAN)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Diagnostics", color = Color.White) },
+                            onClick = {
+                                showMenu = false
+                                viewModel.navigateTo(AppScreen.DIAGNOSTICS)
+                            }
+                        )
+                    }
+                }
             }
 
-            Text(
-                text = "RONiN",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp,
-                color = Color(0xFFF3F3F0)
-            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Box {
+            // Centered Devices Hero (Screenshot 1)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(240.dp)
+                        .clip(CircleShape)
+                        .background(
+                            androidx.compose.ui.graphics.Brush.radialGradient(
+                                colors = listOf(Color(0x335B5FEF), Color.Transparent)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    EclipseArtwork(height = 200.dp)
+                }
+
+                Text(
+                    text = "RONiN ECLIPSE",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    color = Color.White
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF818CF8))
+                    )
+                    Text(
+                        text = "READY",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFFA8A8B8),
+                        letterSpacing = 3.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        val last = connectionState.deviceId
+                        if (last != null) {
+                            viewModel.connectDevice(last)
+                        } else {
+                            viewModel.navigateTo(AppScreen.SCAN)
+                        }
+                    },
+                    shape = RoundedCornerShape(32.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .height(56.dp)
+                        .testTag("connect_button"),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF5B5FEF),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "CONNECT",
+                            letterSpacing = 4.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = "|",
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                TextButton(
+                    onClick = { viewModel.navigateTo(AppScreen.SCAN) },
+                    modifier = Modifier.testTag("add_device_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color(0xFFB4B6FF),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Add Device",
+                        color = Color(0xFFB4B6FF),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+        } else {
+            // Connected Device Layout (Matching Screenshot 2)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(
-                    onClick = { showMenu = true },
+                    onClick = { viewModel.navigateTo(AppScreen.SCAN) },
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(Color(0xFF222428))
                         .size(42.dp)
-                        .testTag("more_menu_button")
+                        .testTag("devices_button")
                 ) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
+                        imageVector = Icons.Default.Air,
+                        contentDescription = "Devices",
                         tint = Color(0xFFF3F3F0),
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier.background(Color(0xFF1E2024))
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Refresh Status", color = Color.White) },
-                        onClick = {
-                            showMenu = false
-                            viewModel.refreshBattery()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Diagnostics", color = Color.White) },
-                        onClick = {
-                            showMenu = false
-                            viewModel.navigateTo(AppScreen.DIAGNOSTICS)
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Disconnect", color = Color(0xFFF2A09A)) },
-                        onClick = {
-                            showMenu = false
-                            viewModel.disconnectDevice()
-                        }
-                    )
-                }
-            }
-        }
-
-        // Header Section with Device Title, Battery, and Earbuds Artwork
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1.1f)) {
                 Text(
-                    text = connectionState.deviceName ?: "RONiN ECLIPSE",
+                    text = "RONiN",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
                     color = Color(0xFFF3F3F0)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
+
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
                         modifier = Modifier
-                            .size(7.dp)
                             .clip(CircleShape)
-                            .background(if (isConnected) DarkSuccess else Color(0xFF818CF8))
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (isConnected) "CONNECTED" else "READY",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF9EA0A6),
-                        letterSpacing = 1.sp
-                    )
+                            .background(Color(0xFF222428))
+                            .size(42.dp)
+                            .testTag("more_menu_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = Color(0xFFF3F3F0),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color(0xFF1E2024))
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Refresh Status", color = Color.White) },
+                            onClick = {
+                                showMenu = false
+                                viewModel.refreshBattery()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Diagnostics", color = Color.White) },
+                            onClick = {
+                                showMenu = false
+                                viewModel.navigateTo(AppScreen.DIAGNOSTICS)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Disconnect", color = Color(0xFFF2A09A)) },
+                            onClick = {
+                                showMenu = false
+                                viewModel.disconnectDevice()
+                            }
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                EarbudBatteryRow(batteryState = batteryState)
             }
 
-            Box(
+            // Header Section with Device Title in Accent, Battery pills, and Earbuds Artwork
+            Row(
                 modifier = Modifier
-                    .weight(0.9f)
-                    .height(140.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                EclipseArtwork(height = 140.dp)
+                Column(modifier = Modifier.weight(1.1f)) {
+                    Text(
+                        text = connectionState.deviceName ?: "RONiN ECLIPSE",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFB4B6FF)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    EarbudBatteryRow(batteryState = batteryState)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(0.9f)
+                        .height(130.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    EclipseArtwork(height = 130.dp)
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Listening Mode Selector Capsule (Noise Reduction / Off / Transparency)
-        ListeningModeSelector(
-            activeMode = listeningMode,
-            pendingMode = pendingMode,
-            onSelectMode = { viewModel.selectListeningMode(it) }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 2 Big Action Cards Side-by-Side (Touch Settings and Sound Settings)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ActionTile(
-                title = "Touch Settings",
-                subtitle = "Gestures & controls",
-                icon = Icons.Default.TouchApp,
-                iconTint = Color(0xFFEF6C88),
-                modifier = Modifier.weight(1f),
-                onClick = { viewModel.navigateTo(AppScreen.TOUCH_SETTINGS) }
+            // Listening Mode Selector Capsule (Noise Reduction / Off / Transparency)
+            ListeningModeSelector(
+                activeMode = listeningMode,
+                pendingMode = pendingMode,
+                onSelectMode = { viewModel.selectListeningMode(it) }
             )
 
-            ActionTile(
-                title = "Sound Settings",
-                subtitle = "EQ & personal sound",
-                icon = Icons.Default.GraphicEq,
-                iconTint = DarkAccentLight,
-                modifier = Modifier.weight(1f),
-                onClick = { viewModel.navigateTo(AppScreen.SOUND_SETTINGS) }
-            )
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // 2 Big Action Cards Side-by-Side: Touch Settings (rose) and Sound Settings (indigo)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionTile(
+                    title = "Touch Settings",
+                    subtitle = "Gestures & controls",
+                    icon = Icons.Default.TouchApp,
+                    containerColor = Color(0xFF3A2830),
+                    borderColor = Color(0xFF52333E),
+                    iconTint = Color(0xFFF28CA5),
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.navigateTo(AppScreen.TOUCH_SETTINGS) }
+                )
 
-        // Vertical Feature Items List (Matching Screenshot 2)
-        FeatureRowItem(
-            icon = Icons.Default.Edit,
-            title = "Name Change",
-            onClick = {
-                renameInput = connectionState.deviceName ?: "Ronin Eclipse"
-                showRenameDialog = true
+                ActionTile(
+                    title = "Sound Settings",
+                    subtitle = "EQ & personal sound",
+                    icon = Icons.Default.GraphicEq,
+                    containerColor = Color(0xFF2B2B4D),
+                    borderColor = Color(0xFF3B3B66),
+                    iconTint = Color(0xFF818CF8),
+                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.navigateTo(AppScreen.SOUND_SETTINGS) }
+                )
             }
-        )
 
-        FeatureRowItem(
-            icon = Icons.Default.Hearing,
-            title = "Hearing Assist",
-            onClick = { viewModel.navigateTo(AppScreen.HEARING_ASSIST) }
-        )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        FeatureRowItem(
-            icon = Icons.Default.Spa,
-            title = "Relaxation",
-            onClick = { viewModel.navigateTo(AppScreen.RELAXATION) }
-        )
+            // Vertical Feature Items List (Matching Screenshot 2)
+            FeatureRowItem(
+                icon = Icons.Default.Edit,
+                title = "Name Change",
+                onClick = {
+                    renameInput = connectionState.deviceName ?: "Ronin Eclipse"
+                    showRenameDialog = true
+                }
+            )
 
-        FeatureRowItem(
-            icon = Icons.Default.CleaningServices,
-            title = "Clean Dust",
-            onClick = { viewModel.openSoundTool(com.example.audio.ToolMode.CLEAN_DUST) }
-        )
+            FeatureRowItem(
+                icon = Icons.Default.Hearing,
+                title = "Hearing Assist",
+                onClick = { viewModel.navigateTo(AppScreen.HEARING_ASSIST) }
+            )
 
-        FeatureRowItem(
-            icon = Icons.Default.Opacity,
-            title = "Drain Moisture",
-            onClick = { viewModel.openSoundTool(com.example.audio.ToolMode.DRAIN_MOISTURE) }
-        )
+            FeatureRowItem(
+                icon = Icons.Default.Spa,
+                title = "Relaxation",
+                onClick = { viewModel.navigateTo(AppScreen.RELAXATION) }
+            )
 
-        FeatureRowItem(
-            icon = Icons.Default.Tune,
-            title = "Device Info & Diagnostics",
-            onClick = { viewModel.navigateTo(AppScreen.DIAGNOSTICS) }
-        )
+            FeatureRowItem(
+                icon = Icons.Default.CleaningServices,
+                title = "Clean Dust",
+                onClick = { viewModel.openSoundTool(com.example.audio.ToolMode.CLEAN_DUST) }
+            )
 
-        FeatureRowItem(
-            icon = Icons.Default.HelpOutline,
-            title = "Help & Offline Manual",
-            onClick = { viewModel.navigateTo(AppScreen.HELP) }
-        )
+            FeatureRowItem(
+                icon = Icons.Default.Opacity,
+                title = "Drain Moisture",
+                onClick = { viewModel.openSoundTool(com.example.audio.ToolMode.DRAIN_MOISTURE) }
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            FeatureRowItem(
+                icon = Icons.Default.Tune,
+                title = "Device Info & Diagnostics",
+                onClick = { viewModel.navigateTo(AppScreen.DIAGNOSTICS) }
+            )
+
+            FeatureRowItem(
+                icon = Icons.Default.HelpOutline,
+                title = "Help & Offline Manual",
+                onClick = { viewModel.navigateTo(AppScreen.HELP) }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 
     if (showRenameDialog) {
@@ -351,6 +516,8 @@ private fun ActionTile(
     subtitle: String,
     icon: ImageVector,
     iconTint: Color,
+    containerColor: Color = Color(0xFF1E2024),
+    borderColor: Color = Color(0xFF2C2F36),
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -358,8 +525,8 @@ private fun ActionTile(
         modifier = modifier
             .height(130.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFF1E2024))
-            .border(1.dp, Color(0xFF2C2F36), RoundedCornerShape(20.dp))
+            .background(containerColor)
+            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(14.dp)
     ) {

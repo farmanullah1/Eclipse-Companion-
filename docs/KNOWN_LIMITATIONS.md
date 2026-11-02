@@ -11,3 +11,12 @@
 
 4. **Hearing Assist Medical Disclaimer:**
    - Hearing Assist is an assistive listening tool using phone microphone amplification, NOT a regulated medical hearing aid or substitute for professional audiologist evaluation.
+
+5. **Maintenance Tones Scope & Safety:**
+   - Clean Dust and Drain Moisture are original phone-side tones; their effectiveness is not proven and they are not the official app's implementation.
+   - Tone loudness depends on the phone's media volume, which the app cannot set.
+
+6. **Audio & UI Alignment Scope:**
+   - Official artist presets are not reproduced (names are real people, exact values are proprietary).
+   - Pill navigation labels may be shortened with very large font scale; each tab still has an accessible name.
+
