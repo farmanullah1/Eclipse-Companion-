@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import com.example.ui.theme.AppThemeOption
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -139,6 +141,77 @@ fun SettingsScreen(
                     valueRange = 10f..40f,
                     colors = SliderDefaults.colors(thumbColor = DarkAccentLight, activeTrackColor = Color(0xFF5D5FEF))
                 )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Visual Theme Selector Card
+        val activeTheme by viewModel.activeTheme.collectAsState()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF1E2024))
+                .border(1.dp, Color(0xFF2C2F36), RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = DarkAccentLight, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Visual Palette & Theme", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("Select your preferred visual style across all screens", fontSize = 11.sp, color = Color(0xFF8E9199))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (themeOption in AppThemeOption.values()) {
+                        val isSelected = themeOption == activeTheme
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) Color(0xFF2A2D38) else Color(0xFF16181D))
+                                .border(
+                                    1.dp,
+                                    if (isSelected) DarkAccentLight else Color(0xFF2C2F36),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { viewModel.setTheme(themeOption) }
+                                .padding(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = themeOption.displayName,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) Color.White else Color(0xFFD1D5DB)
+                                    )
+                                    Text(
+                                        text = themeOption.description,
+                                        fontSize = 10.sp,
+                                        color = Color(0xFF8E9199)
+                                    )
+                                }
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .clip(CircleShape)
+                                            .background(DarkAccentLight)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

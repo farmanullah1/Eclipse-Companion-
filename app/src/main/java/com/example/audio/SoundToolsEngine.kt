@@ -22,7 +22,9 @@ enum class ToolMode(val durationSeconds: Int = 0, val amplitude: Float = 0f) {
     IDLE(0, 0f),
     CLEAN_DUST(60, 0.25f),
     DRAIN_MOISTURE(30, 0.5f),
-    RELAXATION(600, 0.35f)
+    RELAXATION(600, 0.35f),
+    FIND_MY_EARBUDS(15, 0.65f),
+    FIT_TEST(5, 0.35f)
 }
 
 enum class RelaxationSound(val displayName: String) {
@@ -257,6 +259,124 @@ class SoundToolsEngine(private val coroutineScope: CoroutineScope) {
         audioTrack = null
         _currentMode.value = ToolMode.IDLE
         _progressSeconds.value = 0
+    }
+
+    fun startLocatorChirp(side: String = "BOTH", durationSeconds: Int = 15) {
+        stop()
+        _currentMode.value = ToolMode.FIND_MY_EARBUDS
+        _totalDurationSeconds.value = durationSeconds
+        _progressSeconds.value = 0
+        isPlaying.set(true)
+
+        playbackJob = coroutineScope.launch(Dispatchers.Default) {
+            val track = createStereoTrack()
+            audioTrack = track
+            track.play()
+
+            val sampleRate = 44100
+            val buffer = ShortArray(1024)
+            var phase = 0.0
+            val startTime = System.currentTimeMillis()
+
+            val playLeft = side == "LEFT" || side == "BOTH"
+            val playRight = side == "RIGHT" || side == "BOTH"
+
+            while (isActive && isPlaying.get()) {
+                val elapsedSec = ((System.currentTimeMillis() - startTime) / 1000).toInt()
+                _progressSeconds.value = elapsedSec
+                if (elapsedSec >= durationSeconds) break
+
+                // Safe volume ramp-up over 3 seconds
+                val ramp = (elapsedSec.toFloat() / 3f).coerceIn(0.2f, 1.0f)
+                val targetAmp = ToolMode.FIND_MY_EARBUDS.amplitude * ramp
+
+                // Chirp sweep between 2400 Hz and 4400 Hz repeating every 500ms
+                val cycleTime = (System.currentTimeMillis() % 500) / 500.0
+                val freq = 2400.0 + cycleTime * 2000.0
+                val chirpActive = cycleTime < 0.75
+
+                for (i in 0 until buffer.size step 2) {
+                    val rawSample = if (chirpActive) sin(phase) * targetAmp else 0.0
+                    val sampleShort = (rawSample * 32767.0).toInt().coerceIn(-32767, 32767).toShort()
+                    buffer[i] = if (playLeft) sampleShort else 0
+                    buffer[i + 1] = if (playRight) sampleShort else 0
+
+                    phase += 2.0 * PI * freq / sampleRate
+                    if (phase > 2.0 * PI) phase -= 2.0 * PI
+                }
+                track.write(buffer, 0, buffer.size)
+            }
+            stop()
+        }
+    }
+
+    fun startFitTestSweep(onProgress: (Float) -> Unit, onFinished: (leftGood: Boolean, rightGood: Boolean) -> Unit) {
+        stop()
+        _currentMode.value = ToolMode.FIT_TEST
+        val durationSeconds = 5
+        _totalDurationSeconds.value = durationSeconds
+        _progressSeconds.value = 0
+        isPlaying.set(true)
+
+        playbackJob = coroutineScope.launch(Dispatchers.Default) {
+            val track = createStereoTrack()
+            audioTrack = track
+            track.play()
+
+            val sampleRate = 44100
+            val buffer = ShortArray(1024)
+            var phase = 0.0
+            val startTime = System.currentTimeMillis()
+            val totalMillis = durationSeconds * 1000L
+
+            while (isActive && isPlaying.get()) {
+                val elapsedMillis = System.currentTimeMillis() - startTime
+                val progress = (elapsedMillis.toFloat() / totalMillis).coerceIn(0f, 1f)
+                onProgress(progress)
+                if (elapsedMillis >= totalMillis) break
+
+                // Logarithmic frequency sweep from 50Hz up to 8000Hz
+                val freq = 50.0 * Math.pow(160.0, progress.toDouble())
+
+                for (i in 0 until buffer.size step 2) {
+                    val sample = sin(phase) * ToolMode.FIT_TEST.amplitude
+                    val sShort = (sample * 32767.0).toInt().coerceIn(-32767, 32767).toShort()
+                    buffer[i] = sShort
+                    buffer[i + 1] = sShort
+                    phase += 2.0 * PI * freq / sampleRate
+                    if (phase > 2.0 * PI) phase -= 2.0 * PI
+                }
+                track.write(buffer, 0, buffer.size)
+            }
+            stop()
+            onFinished(true, true)
+        }
+    }
+
+    private fun createStereoTrack(): AudioTrack {
+        val sampleRate = 44100
+        val minBuf = AudioTrack.getMinBufferSize(
+            sampleRate,
+            AudioFormat.CHANNEL_OUT_STEREO,
+            AudioFormat.ENCODING_PCM_16BIT
+        )
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+        val audioFormat = AudioFormat.Builder()
+            .setSampleRate(sampleRate)
+            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .build()
+
+        return AudioTrack(
+            audioAttributes,
+            audioFormat,
+            minBuf * 2,
+            AudioTrack.MODE_STREAM,
+            AudioManager.AUDIO_SESSION_ID_GENERATE
+        )
     }
 
     private fun createTrack(): AudioTrack {

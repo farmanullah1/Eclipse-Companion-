@@ -1,28 +1,32 @@
-# Eclipse Companion — Earbud Connection & Emulator Testing Guide
+# Eclipse Companion — Pro Audio Utility Suite & System Integrations
 
-Plan for enabling interactive earbud feature testing in the cloud/browser emulator environment via a designated **Emulator Device Test Mode**, paired with complete guidance for real hardware pairing on physical Android devices.
+A comprehensive blueprint for upgrading Eclipse Companion with professional acoustic utility tools, system-level Android integrations (Home Screen Widget & Quick Settings Tile), proactive hearing protection, and visual themes—all operating with 100% device-local privacy.
 
 ---
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The browser emulator environment does not have access to a physical Bluetooth Low Energy controller or nearby hardware earbuds. To make every feature interactive and testable immediately in your browser tab, we will provide an explicit, toggleable **"Emulator Test Mode"** with a clear indicator banner, while keeping real Bluetooth LE hardware scanning active for real devices.
+> All new utility features, acoustic measurements, widgets, and Quick Settings tiles strictly preserve the app's zero-network guarantee (`android.permission.INTERNET` remains completely excluded). All audio generation, BLE telemetry, and exposure metrics run strictly on-device.
 
-- **Confirmed Environment**: User is using the browser emulator or a virtual device without physical Ronin Eclipse hardware nearby.
-- **Interactive Solution**:
-  - Add a one-tap **"Connect Virtual Ronin Eclipse"** option on the Devices / Scan screen when no physical Bluetooth radio is detected or when running in the emulator.
-  - Display a prominent **"Emulator Test Mode"** indicator in the UI to maintain strict separation between hardware BLE telemetry and virtual test mode.
-  - Allow the user to test real-time battery status changes (Left: 85%, Right: 80%, Case: 90%), ANC listening modes (Noise Reduction, Off, Transparency), touch gesture mapping writes, EQ profile transfers, and diagnostic GATT logs.
-  - Provide complete, concise instructions for installing the APK on a physical Android phone to pair real hardware.
+- **Earbud Utility Suite Confirmed**:
+  - **Find My Earbuds**: Real-time BLE RSSI signal strength radar coupled with high-pitched pulsed acoustic locator beeps (individually triggerable for Left, Right, or Both earbuds).
+  - **Ear Tip Seal Fit Test**: Automated acoustic seal diagnostic that plays calibration sweeps and measures low-frequency containment to ensure optimal ANC performance.
+  - **Hearing Health & Noise Dose Monitor**: Calculates cumulative daily sound exposure against World Health Organization (WHO) safety thresholds (85 dBA 8-hour daily dose) with real-time exposure gauges.
+  - **Spatial Audio Soundstage Studio**: 3D acoustic room simulation allowing listeners to adjust perceived room size, stereo width, and reverberant warmth.
+- **System Integrations & UI Upgrades Confirmed**:
+  - **Android Home Screen Widget**: Quick glance widget displaying real-time Left, Right, and Case battery levels alongside immediate one-tap ANC mode switching.
+  - **Quick Settings Tile (`TileService`)**: System notification shade tile enabling instant ANC / Transparency cycling without opening the app.
+  - **Smart Battery Health & Low-Power Alerts**: Configurable alerts when earbuds reach 20% and 10% battery, plus an optional battery preservation mode.
+  - **Visual Theme Customization**: Three tailored aesthetic palettes: **Obsidian Eclipse** (default dark luxury), **Cyberpunk Neon** (high-contrast cyan/magenta), and **Studio Gold** (analog brass/champagne).
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Provides an immediate, functional way to test all earbud controls (battery indicators, listening modes, touch customization, diagnostic logs, and 10-band EQ) in the browser streaming emulator without physical hardware, while preserving full Android Bluetooth Low Energy scanning and pairing for physical devices.
-- **Target Audience**: Developers, QA testers, and reviewers running the app in cloud or virtual environments without physical Ronin Eclipse earbuds attached.
-- **Key Value**: Enables 100% end-to-end verification of the UI, state transitions, audio DSP tools, and device workflows directly from the browser window.
+- **What It Does**: Transforms Eclipse Companion from a hardware controller into an all-in-one audiophile command center. Users gain emergency acoustic locator tools to find misplaced earbuds, acoustic verification of their silicone ear tip fit, proactive daily hearing protection meters, seamless home screen and notification shade controls, and tailored visual personalization.
+- **Target Audience**: Daily earbud users, commuters, fitness enthusiasts, and audio professionals who want seamless system shortcuts and smart acoustic safety.
+- **Key Value**: Maximum convenience with zero cloud dependencies: find earbuds instantly, control modes from your home screen or status bar, and protect your hearing without tracking.
 
 ---
 
@@ -30,33 +34,44 @@ Plan for enabling interactive earbud feature testing in the cloud/browser emulat
 
 ### Key User Flows
 
-1. **Testing in the Browser Streaming Emulator**:
-   - Navigate to the **Scan / Devices** screen (`DevicesScanScreen`).
-   - An "Emulator Test Mode" card appears with a button: **"Connect Virtual Ronin Eclipse"**.
-   - Tapping it establishes a virtual connection:
-     - Home screen immediately shows connected status: `Ronin Eclipse (Virtual Demo)`.
-     - Battery indicators light up: Left 85%, Right 80%, Case 90%.
-     - Listening mode selector enables live toggling between **Noise Reduction**, **Off**, and **Transparency** with instant feedback and toast notifications.
-     - Touch Settings screen enables modifying gestures and applying them to the virtual device.
-     - Diagnostics screen logs simulated GATT command packets (`0x55 0xAA ...`) matching the real protocol.
-     - A subtle amber badge `[TEST MODE]` appears in the top bar to clearly distinguish simulated telemetry from physical hardware.
+1. **Find My Earbuds (Radar & Chirp)**:
+   - User opens **Find My Earbuds** from the Home or Sound Tools screen.
+   - Screen displays an animated circular radar pulsing with live proximity cues ("Nearby", "Getting Closer", "Very Close" based on BLE RSSI).
+   - Independent action buttons: **Play Left Chirp** and **Play Right Chirp** play a piercing, high-frequency locator tone with gradual volume ramp-up for safety.
 
-2. **Connecting Physical Earbuds on a Real Android Device**:
-   - Download the APK generated via the project's settings menu or run on a connected phone.
-   - Turn on Bluetooth on your Android phone and grant the "Nearby Devices" permission when prompted.
-   - Place Ronin Eclipse earbuds in pairing mode (open the charging case or hold the case pairing button until the LED pulses white/blue).
-   - In Eclipse Companion, tap **"Scan for Devices"**.
-   - Select **"Ronin Eclipse"** from the list of discovered devices to pair.
+2. **Ear Tip Seal Fit Test**:
+   - User initiates **Fit Test** after inserting earbuds.
+   - A 5-second acoustic frequency sweep plays in both ears.
+   - Evaluates low-end bass resonance retention and provides immediate seal verdict: **Good Seal** (green) or **Adjust Fit / Change Tip Size** (amber) for each ear.
+
+3. **Hearing Health & Noise Dose Meter**:
+   - A dedicated **Hearing Health** card on the Sound Settings screen.
+   - Shows a circular progress gauge tracking `% of Safe Daily Dose` (based on WHO 85 dB benchmark).
+   - Alerts user if listening volume and duration approach 100% daily dose.
+
+4. **Home Screen Widget & Quick Settings Tile**:
+   - Users can place a 4x2 or 2x2 widget on their Android home screen showing live battery levels for Left, Right, and Case, with direct buttons for **Noise Reduction**, **Off**, and **Transparency**.
+   - Pulling down the Android notification shade reveals the **Ronin ANC** quick settings tile, cycling listening modes with one tap.
+
+5. **Theme Customization**:
+   - User selects **Themes** in Settings:
+     - **Obsidian Eclipse**: Deep dark `#121314` with `#5D5FEF` violet accent.
+     - **Cyberpunk Neon**: Jet black `#0B0C10` with `#00F0FF` cyan and `#FF003C` magenta highlights.
+     - **Studio Gold**: Warm charcoal `#1A1918` with `#E5B869` brass acoustic accents.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Decision 1: Explicit "Emulator Test Mode" vs Automatic Fallback**:
-  - *Chosen Approach*: Show a designated, prominent button on the scan screen and display an active badge when virtual mode is engaged.
-  - *Why*: Strictly complies with Android developer policy and project guidelines requiring a prominent indicator when simulated data is used, preventing confusion with physical Bluetooth connections.
-- **Decision 2: Preservation of Real Bluetooth Stack**:
-  - *Chosen Approach*: Real `AndroidBluetoothRepository` continues to use genuine `BluetoothLeScanner` and `BluetoothGatt` APIs. The virtual mode interacts through the same `BluetoothRepository` interface without tampering with hardware code paths.
+- **Decision 1: Locator Chirp Safety Ramping**:
+  - *Chosen Approach*: The acoustic locator chirp starts at -18 dBFS and ramps up over 3 seconds, preceded by a prominent "Take earbuds out of your ears before sounding alarm" safety warning.
+  - *Why*: Prevents acoustic shock or hearing damage if the user triggers the chirp while an earbud is still in their ear.
+- **Decision 2: AppWidget Implementation via Clean Jetpack Architecture**:
+  - *Chosen Approach*: Use standard Android `AppWidgetProvider` with `RemoteViews` for instantaneous rendering and wide compatibility across Android 8 through 16 without heavy external widget dependencies.
+  - *Why*: Fast cold-start, low memory footprint, and zero battery drain while the screen is off.
+- **Decision 3: Zero-Network Noise Exposure Calculation**:
+  - *Chosen Approach*: Exposure dose calculations run locally using the Android `AudioManager` volume index and active playback duration.
+  - *Why*: No background microphones or audio streaming data are sent anywhere; computations remain 100% private.
 
 ---
 
@@ -64,38 +79,43 @@ Plan for enabling interactive earbud feature testing in the cloud/browser emulat
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                          DevicesScanScreen                             │
-│  ┌─────────────────────────┐  ┌─────────────────────────────────────┐  │
-│  │ Real BLE Hardware Scan  │  │ Emulator Test Mode Card             │  │
-│  │ (Physical Earbuds)      │  │ "Connect Virtual Ronin Eclipse"     │  │
-│  └───────────┬─────────────┘  └──────────────────┬──────────────────┘  │
-└──────────────┼───────────────────────────────────┼─────────────────────┘
-               │                                   │
-┌──────────────▼───────────────────────────────────▼─────────────────────┐
+│                        System Entry Points                             │
+│  ┌───────────────────────┐  ┌─────────────────┐  ┌──────────────────┐  │
+│  │ MainActivity (Compose)│  │ AppWidgetProvider│  │ QuickSettingsTile│  │
+│  │  - FindMyEarbudsView  │  │  - Battery Bars │  │  - ANC Cycling   │  │
+│  │  - FitTestView        │  │  - Mode Toggles │  └──────────────────┘  │
+│  │  - HearingDoseCard    │  └─────────────────┘                        │
+│  │  - ThemeSelector      │                                             │
+│  └───────────────────────┘                                             │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │ Events & StateFlows
+┌────────────────────────────────────▼───────────────────────────────────┐
 │                            MainViewModel                               │
-│  - connectDevice(deviceId)                                             │
-│  - connectVirtualDemoDevice()                                          │
-│  - isVirtualDemoActive: StateFlow<Boolean>                             │
+│  - findMyEarbudsRadarRssi            - activeTheme: StateFlow<AppTheme>│
+│  - triggerLocatorChirp(side)         - dailyNoiseDosePercent           │
+│  - runSealFitTest()                  - lowBatteryAlertThreshold        │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │
 ┌────────────────────────────────────▼───────────────────────────────────┐
-│                          BluetoothRepository                           │
-│  - connectionState (Connected / Disconnected / Connecting)             │
-│  - batteryState (Left: 85%, Right: 80%, Case: 90%)                     │
-│  - currentListeningMode (NOISE_REDUCTION, OFF, TRANSPARENCY)           │
-│  - diagnosticsLogs (Simulated or Real GATT packets)                    │
+│              Hardware Repositories & Local Audio Engines                │
+│  - AndroidBluetoothRepository (RSSI Telemetry & Device Commands)       │
+│  - SoundToolsEngine (Safe Locator Chirps & Fit Sweeps)                 │
+│  - LocalSettingsRepository (Theme, Dose History & Preferences)         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Implementation Tasks
+### Component & File Mapping
 
-1. **`MainViewModel.kt`**:
-   - Add `isVirtualDemoActive` StateFlow.
-   - Implement `connectVirtualDemoDevice()` to populate connected state, battery readings, default listening mode, and sample diagnostic logs.
-   - Add `disconnectVirtualDemoDevice()`.
-2. **`DevicesScanScreen.kt`**:
-   - Add an **"Emulator Testing / Virtual Earbuds"** card with clear explanation and a prominent **"Connect Virtual Ronin Eclipse"** button.
-3. **`HomeScreen.kt` & Top Bar**:
-   - Add a subtle `[TEST MODE]` chip next to the device name when connected in virtual mode.
-4. **Verification**:
-   - Run `compile_applet` and `testDebugUnitTest` to ensure zero compilation or regression errors.
+1. **`FindMyEarbudsScreen.kt`**:
+   - Interactive radar canvas with distance rings.
+   - Independent L / R chirp triggers with volume ramp and safety warnings.
+2. **`EarTipFitTestScreen.kt`**:
+   - Multi-stage diagnostic sweep with seal feedback animation.
+3. **`HearingHealthCard.kt`**:
+   - Daily WHO noise dose gauge, volume exposure warnings, and safe volume limiter toggle.
+4. **`EclipseAppWidgetProvider.kt` & `EclipseTileService.kt`**:
+   - Home screen widget layout and Quick Settings notification shade tile.
+5. **`Theme.kt` & Theme Engine**:
+   - Dynamic theme state supporting Obsidian, Cyberpunk, and Studio Gold palettes.
+6. **`MainViewModel.kt`**:
+   - Coordinates locator audio, fit test diagnostics, dose calculations, and widget sync.

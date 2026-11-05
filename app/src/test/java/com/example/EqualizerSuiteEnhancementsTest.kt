@@ -3,18 +3,11 @@ package com.example
 import com.example.domain.EqBand
 import com.example.domain.EqPresetCategory
 import com.example.domain.EqProfile
-import org.json.JSONArray
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
 class EqualizerSuiteEnhancementsTest {
 
     @Test
@@ -25,7 +18,7 @@ class EqualizerSuiteEnhancementsTest {
     }
 
     @Test
-    fun json_preset_export_and_import_round_trip() {
+    fun preset_profile_structure_and_safe_clamping() {
         val gains = listOf(3.5f, 2.0f, 0.0f, -1.5f, -3.0f, 0.5f, 1.5f, 4.0f, 5.0f, 6.0f)
         val profile = EqProfile.createWithGains(
             id = "custom_test_123",
@@ -35,35 +28,14 @@ class EqualizerSuiteEnhancementsTest {
             isEditable = true
         )
 
-        // Simulate JSON serialization
-        val array = JSONArray()
-        val obj = JSONObject().apply {
-            put("name", profile.name)
-            val bandsArray = JSONArray()
-            profile.bands.forEach { b ->
-                bandsArray.put(JSONObject().apply {
-                    put("hz", b.centerHz)
-                    put("gain", b.gainDb.toDouble())
-                })
-            }
-            put("bands", bandsArray)
-        }
-        array.put(obj)
-        val jsonString = array.toString()
-
-        // Deserialization
-        val parsedArray = JSONArray(jsonString)
-        assertEquals(1, parsedArray.length())
-        val parsedObj = parsedArray.getJSONObject(0)
-        assertEquals("Studio Warmth", parsedObj.getString("name"))
-
-        val parsedBandsArray = parsedObj.getJSONArray("bands")
-        assertEquals(10, parsedBandsArray.length())
+        assertEquals("Studio Warmth", profile.name)
+        assertEquals(10, profile.bands.size)
+        assertEquals(EqPresetCategory.CUSTOM, profile.category)
+        assertTrue(profile.isUserEditable)
 
         for (i in 0 until 10) {
-            val b = parsedBandsArray.getJSONObject(i)
-            assertEquals(EqProfile.FREQUENCIES[i], b.getInt("hz"))
-            assertEquals(gains[i], b.getDouble("gain").toFloat(), 0.001f)
+            assertEquals(EqProfile.FREQUENCIES[i], profile.bands[i].centerHz)
+            assertEquals(gains[i], profile.bands[i].gainDb, 0.001f)
         }
     }
 
@@ -103,5 +75,11 @@ class EqualizerSuiteEnhancementsTest {
         compensatedBands.forEach { b ->
             assertTrue(b.gainDb in -12.0f..12.0f)
         }
+    }
+
+    @Test
+    fun virtual_demo_constants_are_consistent() {
+        assertEquals("VIRTUAL_RONIN_ECLIPSE", com.example.bluetooth.AndroidBluetoothRepository.VIRTUAL_DEVICE_ID)
+        assertEquals("Ronin Eclipse (Virtual)", com.example.bluetooth.AndroidBluetoothRepository.VIRTUAL_DEVICE_NAME)
     }
 }

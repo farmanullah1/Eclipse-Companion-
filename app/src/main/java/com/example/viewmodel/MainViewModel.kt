@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import com.example.ui.theme.AppThemeOption
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -42,7 +44,11 @@ enum class AppScreen {
     SETTINGS,
     PRODUCTS,
     TIPS,
-    EQUALIZER
+    EQUALIZER,
+    FIND_MY_EARBUDS,
+    FIT_TEST,
+    HEARING_HEALTH,
+    SPATIAL_AUDIO
 }
 
 data class UserNotification(
@@ -94,6 +100,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val virtualizerEnabled: StateFlow<Boolean> = _virtualizerEnabled.asStateFlow()
     private val _virtualizerLevel = MutableStateFlow(50) // 0..100%
     val virtualizerLevel: StateFlow<Int> = _virtualizerLevel.asStateFlow()
+
+    // Visual Theme Customization
+    private val _activeTheme = MutableStateFlow(AppThemeOption.OBSIDIAN)
+    val activeTheme: StateFlow<AppThemeOption> = _activeTheme.asStateFlow()
+
+    // Hearing Health & Daily Noise Dose
+    private val _dailyNoiseDosePercent = MutableStateFlow(34) // Simulated 34% of safe WHO dose
+    val dailyNoiseDosePercent: StateFlow<Int> = _dailyNoiseDosePercent.asStateFlow()
+    private val _safeVolumeLimitEnabled = MutableStateFlow(true)
+    val safeVolumeLimitEnabled: StateFlow<Boolean> = _safeVolumeLimitEnabled.asStateFlow()
+
+    // Spatial Audio Soundstage Studio
+    private val _spatialAudioEnabled = MutableStateFlow(false)
+    val spatialAudioEnabled: StateFlow<Boolean> = _spatialAudioEnabled.asStateFlow()
+    private val _spatialRoomSize = MutableStateFlow(50)
+    val spatialRoomSize: StateFlow<Int> = _spatialRoomSize.asStateFlow()
+    private val _spatialWidth = MutableStateFlow(65)
+    val spatialWidth: StateFlow<Int> = _spatialWidth.asStateFlow()
+    private val _spatialWarmth = MutableStateFlow(40)
+    val spatialWarmth: StateFlow<Int> = _spatialWarmth.asStateFlow()
+
+    // Ear Tip Fit Test Result (Left, Right)
+    private val _fitTestResult = MutableStateFlow<Pair<Boolean, Boolean>?>(null)
+    val fitTestResult: StateFlow<Pair<Boolean, Boolean>?> = _fitTestResult.asStateFlow()
 
     val savedEqProfiles = settingsRepository.savedEqProfiles.stateIn(
         viewModelScope,
@@ -151,10 +181,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val isVirtualDemoActive: StateFlow<Boolean> = bluetoothRepository.connectionState.map {
+        it.deviceId == AndroidBluetoothRepository.VIRTUAL_DEVICE_ID && it.phase == ConnectionPhase.READY
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun connectDevice(deviceId: String) {
         viewModelScope.launch {
             bluetoothRepository.connect(deviceId)
             settingsRepository.setLastConnectedDevice(deviceId, "Ronin Eclipse")
+            _currentScreen.value = AppScreen.HOME
+        }
+    }
+
+    fun connectVirtualDemoDevice() {
+        viewModelScope.launch {
+            bluetoothRepository.connect(AndroidBluetoothRepository.VIRTUAL_DEVICE_ID)
+            settingsRepository.setLastConnectedDevice(
+                AndroidBluetoothRepository.VIRTUAL_DEVICE_ID,
+                AndroidBluetoothRepository.VIRTUAL_DEVICE_NAME
+            )
+            showNotification("Connected to Virtual Ronin Eclipse (Emulator Test Mode)")
             _currentScreen.value = AppScreen.HOME
         }
     }
@@ -454,6 +500,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun stopSoundTool() {
         soundToolsEngine.stop()
         showNotification("Audio stopped")
+    }
+
+    // Theme selection
+    fun setTheme(theme: AppThemeOption) {
+        _activeTheme.value = theme
+        showNotification("Theme changed to ${theme.displayName}")
+    }
+
+    // Find My Earbuds
+    fun startLocatorChirp(side: String = "BOTH") {
+        soundToolsEngine.startLocatorChirp(side, durationSeconds = 15)
+        showNotification("Playing locator alarm on $side earbud(s)")
+    }
+
+    // Ear Tip Fit Test
+    fun startFitTest() {
+        _fitTestResult.value = null
+        soundToolsEngine.startFitTestSweep(
+            onProgress = {},
+            onFinished = { leftGood, rightGood ->
+                _fitTestResult.value = Pair(leftGood, rightGood)
+                showNotification("Acoustic seal test complete: Great fit!")
+            }
+        )
+        showNotification("Running acoustic seal test...")
+    }
+
+    // Hearing Health
+    fun setSafeVolumeLimit(enabled: Boolean) {
+        _safeVolumeLimitEnabled.value = enabled
+        showNotification(if (enabled) "Safe Volume Limiter active (85 dBA)" else "Volume Limiter disabled")
+    }
+
+    // Spatial Audio
+    fun setSpatialAudio(enabled: Boolean, roomSize: Int = _spatialRoomSize.value, width: Int = _spatialWidth.value, warmth: Int = _spatialWarmth.value) {
+        _spatialAudioEnabled.value = enabled
+        _spatialRoomSize.value = roomSize.coerceIn(10, 100)
+        _spatialWidth.value = width.coerceIn(10, 100)
+        _spatialWarmth.value = warmth.coerceIn(0, 100)
+        showNotification(if (enabled) "Spatial Soundstage active" else "Spatial Audio disabled")
     }
 
     fun renameEarbuds(newName: String) {

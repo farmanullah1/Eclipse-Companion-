@@ -27,13 +27,17 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Hearing
+import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Spa
+import androidx.compose.material.icons.filled.SurroundSound
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -80,6 +84,7 @@ fun HomeScreen(
     val listeningMode by viewModel.bluetoothRepository.currentListeningMode.collectAsState()
     val isModePending by viewModel.isModePending.collectAsState()
     val pendingMode by viewModel.pendingListeningMode.collectAsState()
+    val isVirtualDemoActive by viewModel.isVirtualDemoActive.collectAsState()
 
     var showMenu by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -359,12 +364,31 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1.1f)) {
-                    Text(
-                        text = connectionState.deviceName ?: "RONiN ECLIPSE",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFB4B6FF)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = connectionState.deviceName ?: "RONiN ECLIPSE",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB4B6FF)
+                        )
+                        if (isVirtualDemoActive) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0xFFD97706).copy(alpha = 0.2f))
+                                    .border(1.dp, Color(0xFFFBBF24), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "TEST MODE",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFBBF24)
+                                )
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                     EarbudBatteryRow(batteryState = batteryState)
                 }
@@ -421,6 +445,30 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Vertical Feature Items List (Matching Screenshot 2)
+            FeatureRowItem(
+                icon = Icons.Default.Radar,
+                title = "Find My Earbuds",
+                onClick = { viewModel.navigateTo(AppScreen.FIND_MY_EARBUDS) }
+            )
+
+            FeatureRowItem(
+                icon = Icons.Default.Verified,
+                title = "Ear Tip Fit Test",
+                onClick = { viewModel.navigateTo(AppScreen.FIT_TEST) }
+            )
+
+            FeatureRowItem(
+                icon = Icons.Default.HealthAndSafety,
+                title = "Hearing Health & Sound Dose",
+                onClick = { viewModel.navigateTo(AppScreen.HEARING_HEALTH) }
+            )
+
+            FeatureRowItem(
+                icon = Icons.Default.SurroundSound,
+                title = "Spatial Soundstage Studio",
+                onClick = { viewModel.navigateTo(AppScreen.SPATIAL_AUDIO) }
+            )
+
             FeatureRowItem(
                 icon = Icons.Default.Edit,
                 title = "Name Change",

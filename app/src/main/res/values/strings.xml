@@ -24,4 +24,6 @@
     <string name="cd_right_earbud">Right earbud</string>
     <string name="cd_charging_case">Charging case</string>
     <string name="cd_refresh">Refresh status</string>
+    <string name="widget_description">Eclipse earbud battery status and quick listening mode controls</string>
+    <string name="tile_name">Ronin ANC</string>
 </resources>

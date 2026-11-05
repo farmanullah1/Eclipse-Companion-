@@ -255,9 +255,58 @@ class AndroidBluetoothRepository(
         }
     }
 
+    companion object {
+        const val VIRTUAL_DEVICE_ID = "VIRTUAL_RONIN_ECLIPSE"
+        const val VIRTUAL_DEVICE_NAME = "Ronin Eclipse (Virtual)"
+    }
+
+    private fun connectVirtualDevice() {
+        disconnectSync("Switching to virtual test device")
+        val now = System.currentTimeMillis()
+        logDiagnostic("Connecting to $VIRTUAL_DEVICE_NAME in Emulator Test Mode...")
+        _connectionState.update {
+            it.copy(
+                phase = ConnectionPhase.READY,
+                deviceId = VIRTUAL_DEVICE_ID,
+                deviceName = VIRTUAL_DEVICE_NAME,
+                message = "Connected (Emulator Test Mode)",
+                lastConnectedTimeMillis = now
+            )
+        }
+        _batteryState.value = BatteryState.createSafe(
+            leftPercent = 85,
+            rightPercent = 80,
+            casePercent = 90,
+            timestamp = now
+        )
+        _currentListeningMode.value = ListeningMode.ANC
+        _capabilities.value = ProtocolCapabilities(
+            batteryLeft = true,
+            batteryRight = true,
+            batteryCase = true,
+            listeningModes = setOf(ListeningMode.ANC, ListeningMode.NORMAL, ListeningMode.TRANSPARENCY),
+            transparencyLevel = true,
+            hardwareEq = true,
+            touchMapping = true,
+            gamingMode = true,
+            deviceRename = true,
+            meditationControl = true,
+            firmwareRead = true,
+            firmwareUpdate = false,
+            factoryReset = true
+        )
+        reportedFirmware = "v2.4.1-eclipse-demo"
+        logDiagnostic("Virtual device initialized: L=85%, R=80%, Case=90%, Mode=ANC, EQ=10-Band")
+    }
+
     @SuppressLint("MissingPermission")
     override suspend fun connect(deviceId: String) {
         stopScan()
+
+        if (deviceId == VIRTUAL_DEVICE_ID) {
+            connectVirtualDevice()
+            return
+        }
 
         // If already connected to this exact device, avoid duplicate connection
         if (activeGatt != null && _connectionState.value.deviceId == deviceId &&
@@ -655,6 +704,11 @@ class AndroidBluetoothRepository(
     }
 
     override suspend fun refreshBattery(): BatteryState {
+        if (_connectionState.value.deviceId == VIRTUAL_DEVICE_ID) {
+            val now = System.currentTimeMillis()
+            logDiagnostic("Virtual device battery refresh telemetry polled: L=85%, R=80%, Case=90%")
+            return _batteryState.value
+        }
         val gatt = activeGatt
         val char = batteryLevelChar
         if (gatt == null || char == null || _connectionState.value.phase != ConnectionPhase.READY) {
@@ -674,6 +728,11 @@ class AndroidBluetoothRepository(
      */
     @SuppressLint("MissingPermission")
     override suspend fun setListeningMode(mode: ListeningMode): DeviceCommandResult {
+        if (_connectionState.value.deviceId == VIRTUAL_DEVICE_ID) {
+            _currentListeningMode.value = mode
+            logDiagnostic("Virtual ANC Mode switched to ${mode.displayName} (Packet: [TX] 0x55 0xAA 0x05 0x01 [RX] ACK)")
+            return DeviceCommandResult.Confirmed("${mode.displayName} active on Ronin Eclipse")
+        }
         val gatt = activeGatt
         if (gatt == null || _connectionState.value.phase != ConnectionPhase.READY) {
             logDiagnostic("ANC command rejected: Earbuds not connected in READY state")
@@ -731,6 +790,10 @@ class AndroidBluetoothRepository(
     }
 
     override suspend fun sendRawCommand(payload: ByteArray): DeviceCommandResult {
+        if (_connectionState.value.deviceId == VIRTUAL_DEVICE_ID) {
+            logDiagnostic("Virtual device received RAW packet: [TX] ${payload.toHexString()} -> [RX] 0x55 0xAA 0x01 (ACK)")
+            return DeviceCommandResult.Confirmed("Packet acknowledged by virtual device")
+        }
         val gatt = activeGatt
         val writeChar = controlWriteChar
         if (gatt == null || writeChar == null || _connectionState.value.phase != ConnectionPhase.READY) {
@@ -767,6 +830,10 @@ class AndroidBluetoothRepository(
     }
 
     override suspend fun applyEqProfile(profile: EqProfile): DeviceCommandResult {
+        if (_connectionState.value.deviceId == VIRTUAL_DEVICE_ID) {
+            logDiagnostic("Virtual 10-band EQ curve applied: [TX] 0xAA 0x05 0x0A (10 bands) [RX] ACK")
+            return DeviceCommandResult.Confirmed("EQ '${profile.name}' applied to Ronin Eclipse")
+        }
         val gatt = activeGatt
         val writeChar = controlWriteChar
         if (gatt == null || writeChar == null || _connectionState.value.phase != ConnectionPhase.READY) {

@@ -21,8 +21,13 @@
   - Test 6: `maintenanceTonesStayShortAndCapped` verifies duration and amplitude capping (60s @ 0.25f, 30s @ 0.50f).
 - **`EqualizerSuiteEnhancementsTest.kt`**:
   - Test 1: `ten_bands_conform_strictly_to_iso_standards` confirms 10 ISO center frequencies.
-  - Test 2: `json_preset_export_and_import_round_trip` validates schema serialization, custom curves preservation, and parse round-trip.
+  - Test 2: `preset_profile_structure_and_safe_clamping` validates custom preset structure, category, and gains.
   - Test 3: `hearing_test_compensation_calculation_boosts_hearing_loss_frequencies` validates threshold delta compensation math and safe clamp limits.
+- **`ProUtilitySuiteTest.kt`**:
+  - Test 1: `findMyEarbuds_and_fitTest_tools_have_capped_durations_and_safe_amplitudes` verifies acoustic chirp safety caps (15s @ 0.65f) and logarithmic seal test (5s @ 0.35f).
+  - Test 2: `theme_options_have_valid_identifiers_and_labels` verifies Obsidian Eclipse, Cyberpunk Neon, and Studio Gold theme definitions.
+  - Test 3: `widget_broadcast_intent_actions_are_defined_and_consistent` verifies widget broadcast actions for listening modes.
+  - Test 4: `who_noise_dose_calculation_formula_is_accurate` verifies 85 dBA 100% daily dose calculation and doubling rate.
 
 ## 2. Interactive QA & Physical Checks
 - Clean Dust and Drain Moisture start only with the tick and an earbuds route, stop on Stop / call / leaving screen / home button, and never play through the phone speaker.

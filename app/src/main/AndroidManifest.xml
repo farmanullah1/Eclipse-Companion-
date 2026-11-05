@@ -71,6 +71,31 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!-- Home Screen App Widget -->
+        <receiver
+            android:name=".widget.EclipseAppWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.ACTION_WIDGET_SET_ANC" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/eclipse_widget_info" />
+        </receiver>
+
+        <!-- Quick Settings Tile for instant ANC cycling -->
+        <service
+            android:name=".quicksettings.EclipseTileService"
+            android:exported="true"
+            android:label="@string/tile_name"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

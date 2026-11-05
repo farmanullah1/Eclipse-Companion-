@@ -63,8 +63,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupportAgent
 import com.example.ui.screens.DevicesScanScreen
 import com.example.ui.screens.DiagnosticsScreen
+import com.example.ui.screens.EarTipFitTestScreen
 import com.example.ui.screens.EqualizerScreen
+import com.example.ui.screens.FindMyEarbudsScreen
 import com.example.ui.screens.HearingAssistScreen
+import com.example.ui.screens.HearingHealthScreen
 import com.example.ui.screens.HelpScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ProductsScreen
@@ -72,6 +75,7 @@ import com.example.ui.screens.RelaxationScreen
 import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.SoundSettingsScreen
 import com.example.ui.screens.SoundToolsScreen
+import com.example.ui.screens.SpatialAudioScreen
 import com.example.ui.screens.TipsScreen
 import com.example.ui.screens.TouchSettingsScreen
 import com.example.ui.theme.DarkAccent
@@ -91,7 +95,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MyApplicationTheme(darkTheme = true) {
+            val activeTheme by viewModel.activeTheme.collectAsState()
+            MyApplicationTheme(appTheme = activeTheme, darkTheme = true) {
                 val currentScreen by viewModel.currentScreen.collectAsState()
                 val notification by viewModel.notification.collectAsState()
 
@@ -137,6 +142,10 @@ class MainActivity : ComponentActivity() {
                             AppScreen.PRODUCTS -> ProductsScreen(viewModel = viewModel)
                             AppScreen.TIPS -> TipsScreen(viewModel = viewModel)
                             AppScreen.EQUALIZER -> EqualizerScreen(viewModel = viewModel)
+                            AppScreen.FIND_MY_EARBUDS -> FindMyEarbudsScreen(viewModel = viewModel)
+                            AppScreen.FIT_TEST -> EarTipFitTestScreen(viewModel = viewModel)
+                            AppScreen.HEARING_HEALTH -> HearingHealthScreen(viewModel = viewModel)
+                            AppScreen.SPATIAL_AUDIO -> SpatialAudioScreen(viewModel = viewModel)
                         }
 
                         // Notification Toast / Banner
